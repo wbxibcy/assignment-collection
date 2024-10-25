@@ -1,1 +1,15 @@
-# assignment-collection
+# 作业收集系统
+
+这是一个前后端分离的作业收集系统，允许学生上传多种格式的作业文件。系统目前支持上传文档（如 `.docx`、`.doc`、`.pdf` 和 `.ipynb`），并根据班级、学号和姓名进行分类。
+
+## 技术栈 
+
+- **前端**：Vue3 + TypeScript + Element Plus
+- **后端**：Node.js、Express 
+- **文件上传**：Multer 中间件 
+- **测试框架**：Jest 和 Supertest
+
+## 功能 
+
+- 学生选择班级并输入学号和姓名。 
+- 支持文件上传，后端保存文件。
