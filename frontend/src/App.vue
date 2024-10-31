@@ -16,7 +16,5 @@ export default defineComponent({
 </script>
 
 <style>
-#app {
-  padding: 20px;
-}
+
 </style>
