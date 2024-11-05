@@ -3,17 +3,19 @@ const router = express.Router();
 const { pool } = require('../utils/db');
 const crypto = require('crypto');
 const fs = require('fs');
+const { DateTime } = require('luxon');
 const path = require('path');
 const upload = require('../services/fileService');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
 router.post('/generateTestData', upload.single('assignmentFile'), async (req, res) => {
     try {
         // 定义测试文件夹路径
         const testFilesDir = path.join(__dirname, '../tests/testFiles');
+        const uploadsDir = path.join(__dirname, '../');
 
         // 如果文件夹不存在，则创建文件夹
         if (!fs.existsSync(testFilesDir)) {
@@ -22,7 +24,7 @@ router.post('/generateTestData', upload.single('assignmentFile'), async (req, re
 
         // 学生 1：多次提交相同文件
         const studentId1 = 123456;
-        const studentName1 = 'John Doe6';
+        const studentName1 = 'John Doe1';
         const className1 = 'Physics';
         const HWnumber1 = 1;
 
@@ -32,20 +34,14 @@ router.post('/generateTestData', upload.single('assignmentFile'), async (req, re
         for (let i = 0; i < 2; i++) {  // 假设学生 1 提交了相同的文件两次
             console.log(i);
             const filenameHash = `uploads/${crypto.createHash('sha256').update(filePath1 + i).digest('hex')}.txt`;
+            const savedFilePath = path.join(uploadsDir, filenameHash); // 保存在 uploads 目录下
+            fs.copyFileSync(filePath1, savedFilePath);  // 将文件复制到 uploads 文件夹
             console.log(filenameHash);
 
-            const currentDate = new Date();
-            const options = {
-                timeZone: 'Asia/Shanghai',  // 替换为所需的时区
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            const formatter = new Intl.DateTimeFormat('zh-CN', options);
-            const formattedDate = formatter.format(currentDate);
+            // 获取上海时间并加上时区信息
+            const formattedDate = DateTime.now().setZone('Asia/Shanghai').toFormat('yyyy-MM-dd HH:mm:ss Z');
+
+            console.log(formattedDate);
 
             await pool.query(
                 'INSERT INTO classes (studentnumber, studentname, classname, HWnumber, filename, created_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -69,16 +65,28 @@ router.post('/generateTestData', upload.single('assignmentFile'), async (req, re
         const filenameHash2 = `uploads/${crypto.createHash('sha256').update(filePath2).digest('hex')}.txt`;
         const filenameHash3 = `uploads/${crypto.createHash('sha256').update(filePath3).digest('hex')}.txt`;
 
+        const savedFilePath2 = path.join(uploadsDir, filenameHash2);
+        const savedFilePath3 = path.join(uploadsDir, filenameHash3);
+
+        // 复制文件到 uploads 目录
+        fs.copyFileSync(filePath2, savedFilePath2);
+        fs.copyFileSync(filePath3, savedFilePath3);
+
         console.log(filenameHash2);
         console.log(filenameHash3);
 
+        // 获取上海时间并加上时区信息
+        const formattedDate = DateTime.now().setZone('Asia/Shanghai').toFormat('yyyy-MM-dd HH:mm:ss Z');
+
+        console.log(formattedDate);
+
         await pool.query(
-            'INSERT INTO classes (studentnumber, studentname, classname, HWnumber, filename) VALUES (?, ?, ?, ?, ?)',
-            [studentId2, studentName2, className2, HWnumber2, filenameHash2]
+            'INSERT INTO classes (studentnumber, studentname, classname, HWnumber, filename, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [studentId2, studentName2, className2, HWnumber2, filenameHash2, formattedDate]
         );
         await pool.query(
-            'INSERT INTO classes (studentnumber, studentname, classname, HWnumber, filename) VALUES (?, ?, ?, ?, ?)',
-            [studentId2, studentName2, className2, HWnumber2, filenameHash3]
+            'INSERT INTO classes (studentnumber, studentname, classname, HWnumber, filename, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [studentId2, studentName2, className2, HWnumber2, filenameHash3, formattedDate]
         );
 
         res.status(200).json({ message: 'Test data generated successfully for two students.' });

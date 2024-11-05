@@ -1,4 +1,5 @@
 const { pool } = require('../utils/db');
+const { DateTime } = require('luxon');
 
 const uploadController = async (req, res) => {
     if (!req.file) {
@@ -7,20 +8,12 @@ const uploadController = async (req, res) => {
 
     try {
         const { studentId, name, className, HWnumber } = req.body;
-        const filePath = `uploads/${req.file.filename}`; // 存储文件路径
+        const filePath = `uploads/${req.file.filename}`;
 
-        const currentDate = new Date();
-        const options = {
-            timeZone: 'Asia/Shanghai',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        };
-        const formatter = new Intl.DateTimeFormat('zh-CN', options);
-        const formattedDate = formatter.format(currentDate);
+        // 获取上海时间并加上时区信息
+        const formattedDate = DateTime.now().setZone('Asia/Shanghai').toFormat('yyyy-MM-dd HH:mm:ss Z');
+
+        console.log(formattedDate);
 
         // 将文件信息存储到数据库
         const result = await pool.query(
