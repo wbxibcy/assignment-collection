@@ -9,6 +9,7 @@ yarn.lock
 dist/
 coverage/
 logs/
+*.sqlite
 
 # Vue.js
 /dist/

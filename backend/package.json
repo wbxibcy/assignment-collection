@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "test": "jest"
+    "start": "nodemon server.js tidb",
+    "test": "jest",
+    "init-db": "node ./utils/initdatabase.js sqlite && node ./utils/initdatabase.js tidb",
+    "dev": "nodemon server.js sqlite"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +15,9 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "jest": "^29.7.0",
