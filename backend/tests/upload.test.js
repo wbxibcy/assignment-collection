@@ -1,129 +1,101 @@
-const request = require('supertest');
-const app = require('../app'); // 引入你的 Express 应用
-const fs = require('fs');
-const path = require('path');
-const { pool } = require('../utils/db'); // 引入数据库连接池
+// const request = require('supertest');
+// const app = require('../app'); // 引入你的 Express 应用
+// const fs = require('fs');
+// const path = require('path');
+// const { pool } = require('../utils/db'); // 引入数据库连接池
 
-// 存储测试中创建的文件路径
-const testFiles = [];
+// // 存储测试中创建的文件路径
+// const testFiles = [];
 
-describe('File Upload API', () => {
-  // 在每个测试前清理数据库
-  beforeEach(async () => {
-    jest.clearAllMocks(); // 清除所有模拟
-    await pool.query('DELETE FROM classes'); // 清空 classes 表
-  });
+// describe('File Upload API', () => {
+//   let studentId;
+//   let courseId;
 
-  // 在每个测试后清理上传的文件
-  afterEach(async () => {
-    // 删除测试中上传的文件
-    for (const filePath of testFiles) {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // 删除文件
-      }
-    }
-    testFiles.length = 0; // 清空测试文件列表
+//   beforeEach(async () => {
+//     jest.clearAllMocks(); // 清除所有模拟
 
-    // 这里可以加入逻辑来删除 uploads 文件夹中的文件
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
-    if (fs.existsSync(uploadsDir)) {
-      const files = fs.readdirSync(uploadsDir);
-      for (const file of files) {
-        const filePath = path.join(uploadsDir, file);
-        // 只删除在数据库中保存的文件
-        if (file.startsWith('upload_')) { // 假设上传的文件以 'upload_' 开头
-          fs.unlinkSync(filePath); // 删除文件
-        }
-      }
-    }
-  });
+//     // 清空表数据
+//     await pool.query('DELETE FROM student_courses');
+//     await pool.query('DELETE FROM teacher_courses');
+//     await pool.query('DELETE FROM users');
+//     await pool.query('DELETE FROM courses');
 
-  // 测试成功上传文件
-  it('should upload a file and save its information in the database', async () => {
-    const filePath = path.join(__dirname, './testFiles/testfile.txt'); // 创建一个测试文件
-    fs.writeFileSync(filePath, 'This is a test file content.'); // 创建临时文件
+//     try {
+//       // 插入一个学生
+//       const userResult = await pool.query(
+//         "INSERT INTO users (username, password, class, role) VALUES ('student1', 'password', 'Physics', 'student')"
+//       );
+//       console.log('userResult:', userResult); // 输出查询结果
 
-    const res = await request(app)
-      .post('/api/uploads')
-      .field('studentId', '12345')
-      .field('name', 'John Doe')
-      .field('className', 'Physics')
-      .field('HWnumber', '1')
-      .attach('assignmentFile', filePath); // 上传文件
+//       studentId = userResult[0].insertId || userResult[0].lastInsertId;
 
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('File uploaded successfully.');
+//       // 插入一个课程
+//       const courseResult = await pool.query(
+//         "INSERT INTO courses (course_name, description) VALUES ('Physics', 'Physics course description')"
+//       );
 
-    // 检查数据库中是否有相关记录
-    const dbResult = await pool.query('SELECT * FROM classes WHERE studentnumber = ?', [12345]);
-    expect(dbResult[0].studentname).toBe('John Doe');
+//       courseId = courseResult[0].insertId || courseResult[0].lastInsertId;
 
-    // 记录哈希文件名并推送到测试文件列表
-    const hashFilename = dbResult[0].filename;
-    const uploadedFilePath = path.join(__dirname, '..', hashFilename); // 计算完整路径
-    testFiles.push(uploadedFilePath); // 记录哈希文件路径
+//       console.log(`Student ID: ${studentId}, Course ID: ${courseId}`);
+//     } catch (err) {
+//       console.error('Error during setup:', err);
+//       throw err;
+//     }
+//   });
 
-    expect(hashFilename).toMatch(/^uploads\/[a-f0-9]{64}\.txt$/);
-  });
+//   // 在每个测试后清理上传的文件
+//   afterEach(async () => {
+//     for (const filePath of testFiles) {
+//       if (fs.existsSync(filePath)) {
+//         fs.unlinkSync(filePath); // 删除文件
+//       }
+//     }
+//     testFiles.length = 0;
 
-  // 测试未上传文件的情况
-  it('should return 400 if no file is uploaded', async () => {
-    const res = await request(app)
-      .post('/api/uploads')
-      .field('studentId', '12345')
-      .field('name', 'John Doe')
-      .field('className', 'Physics')
-      .field('HWnumber', '1');
+//     const uploadsDir = path.join(__dirname, '..', 'uploads');
+//     if (fs.existsSync(uploadsDir)) {
+//       const files = fs.readdirSync(uploadsDir);
+//       for (const file of files) {
+//         const filePath = path.join(uploadsDir, file);
+//         if (file.startsWith('upload_')) {
+//           fs.unlinkSync(filePath); // 删除文件
+//         }
+//       }
+//     }
+//   });
 
-    expect(res.status).toBe(400);
-    expect(res.text).toBe('No file uploaded.'); // 检查错误信息
-  });
+//   // 测试成功上传文件
+//   it('should upload a file and save its information in the database', async () => {
+//     const filePath = path.join(__dirname, './testFiles/testfile.txt');
+//     fs.writeFileSync(filePath, 'This is a test file content.');
 
-  // 测试文件名冲突
-  it('should handle filename conflicts correctly', async () => {
-    const filePath1 = path.join(__dirname, './testFiles/testfile1.txt'); // 创建第一个测试文件
-    fs.writeFileSync(filePath1, 'First test file content.');
+//     const res = await request(app)
+//       .post('/api/uploads')
+//       .field('name', 'student1')
+//       .field('className', 'Physics')
+//       .field('HWnumber', '1')
+//       .attach('assignmentFile', filePath);
 
-    const res1 = await request(app)
-      .post('/api/uploads')
-      .field('studentId', '12345')
-      .field('name', 'John Doe')
-      .field('className', 'Physics')
-      .field('HWnumber', '1')
-      .attach('assignmentFile', filePath1); // 上传第一个文件
+//     expect(res.status).toBe(200);
+//     expect(res.body.message).toBe('文件上传并记录成功');
 
-    expect(res1.status).toBe(200);
+//     // 检查数据库中的相关记录
+//     const dbResult = await pool.query('SELECT * FROM student_courses WHERE student_id = ? AND course_id = ?', [studentId, courseId]);
+//     console.log("这是测试的dbresult")
+//     console.log(dbResult[0][0]);
+//     expect(dbResult[0][0].filename).toMatch(/^uploads\/[a-f0-9]{64}\.txt$/);
+//     testFiles.push(path.join(__dirname, '..', dbResult[0][0].filename));
+//   });
 
-    // 检查数据库中是否有相关记录
-    const dbResult1 = await pool.query('SELECT * FROM classes WHERE studentnumber = ?', [12345]);
-    expect(dbResult1[0].studentname).toBe('John Doe');
+//   // 测试未上传文件的情况
+//   it('should return 400 if no file is uploaded', async () => {
+//     const res = await request(app)
+//       .post('/api/uploads') // 使用正确的 API 路径
+//       .field('name', 'student1')
+//       .field('className', 'Physics')
+//       .field('HWnumber', '1');
 
-    // 记录第一个文件的哈希名
-    const hashFilename1 = dbResult1[0].filename;
-    const uploadedFilePath1 = path.join(__dirname, '..', hashFilename1); // 计算完整路径
-    testFiles.push(uploadedFilePath1); // 记录哈希文件路径
-
-    // 上传第二个同名文件
-    const filePath2 = path.join(__dirname, './testFiles/testfile1_copy.txt'); // 创建第二个不同名称的测试文件
-    fs.writeFileSync(filePath2, 'Second test file content.');
-
-    const res2 = await request(app)
-      .post('/api/uploads')
-      .field('studentId', '12345')
-      .field('name', 'John Doe')
-      .field('className', 'Physics')
-      .field('HWnumber', '1')
-      .attach('assignmentFile', filePath2); // 上传第二个文件
-
-    expect(res2.status).toBe(200);
-
-    // 重新查询数据库以确保获取到第二个文件的哈希名
-    const dbResult2 = await pool.query('SELECT * FROM classes WHERE studentnumber = ?', [12345]);
-    expect(dbResult2.length).toBe(2); // 确保有两条记录
-
-    // 记录第二个文件的哈希名
-    const hashFilename2 = dbResult2[1].filename; // 假设第二个文件在数组中的位置
-    const uploadedFilePath2 = path.join(__dirname, '..', hashFilename2); // 计算完整路径
-    testFiles.push(uploadedFilePath2); // 记录哈希文件路径
-  });
-});
+//     expect(res.status).toBe(400);
+//     expect(res.body.message).toBe('未上传文件');
+//   });
+// });

@@ -3,9 +3,9 @@ const cors = require('cors');
 const uploadRoutes = require('./routes/uploadRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const testDataRouter = require('./routes/testData');
+const downloadRouter = require('./routes/download');
 
 const app = express();
-const port = 3000;
 
 // 中间件
 app.use(cors());
@@ -19,5 +19,6 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/uploads', uploadRoutes);  // 上传文件的路由
 app.use('/api/search', searchRoutes);   // 搜索文件的路由
 app.use('/api/test', testDataRouter); // 插入测试数据的路由
+app.use('/api/download', downloadRouter);  // 配置下载路由
 
 module.exports = app;

@@ -1,6 +1,6 @@
 const app = require('./app');
-const port = process.env.PORT || 3000;
-const alternatePorts = [3030, 3031, 3032]; // 可用备用端口数组
+const port = 3030;
+const alternatePorts = [3031, 3032]; // 可用备用端口数组
 
 const startServer = (portToUse, index = 0) => {
   app.listen(portToUse, () => {
