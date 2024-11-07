@@ -7,6 +7,47 @@ const { DateTime } = require('luxon');
 const path = require('path');
 const upload = require('../services/fileService');
 
+/**
+ * @swagger
+ * /test/generateTestData:
+ *   post:
+ *     summary: 为两名学生生成测试数据
+ *     tags: 
+ *       - Generate test data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assignmentFile:
+ *                 type: string
+ *                 format: binary
+ *                 description: 要上传的作业文件
+ *     responses:
+ *       200:
+ *         description: 成功生成测试数据
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 成功为两名学生生成测试数据.
+ *       500:
+ *         description: 生成测试数据时出错
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: 生成测试数据失败.
+ */
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

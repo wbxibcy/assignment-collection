@@ -1,4 +1,4 @@
-const dbConfig = {
+const Config = {
     sqlite: {
         type: 'sqlite',
         database: 'database.sqlite',
@@ -11,6 +11,7 @@ const dbConfig = {
         password: '',
         database: 'HW',
     },
+    jwtSecret: 'my_jwt_secret',
 };
 
-module.exports = dbConfig;
+module.exports = Config;

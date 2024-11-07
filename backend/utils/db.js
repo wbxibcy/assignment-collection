@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 const sqlite3 = require('sqlite3').verbose();
 const dbConfig = require('../config/config');
 
-const dbType = process.argv[2] || 'tidb'; // 从命令行获取数据库类型
+const dbType = process.argv[2] || 'tidb';
 
 let pool;
 
